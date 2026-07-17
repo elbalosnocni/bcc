@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Tra cứu lỗi đăng ký cơm nhân viên</title>
+<title>Bảng Chấm Công</title>
 
 <style>
 body {
@@ -57,14 +57,14 @@ th {
 
 <body>
 
-<h2>🔎 Tra cứu lỗi đăng ký cơm</h2>
+<h2>🔎 BẢNG CHẤM CÔNG</h2>
 <div style="margin-top:10px">
     <p>📱 Quét QR để tra cứu nhanh</p>
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://elbalosnocni.github.io/com/" alt="QR Code">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://elbalosnocni.github.io/bcc/" alt="QR Code">
 </div>    
 <p>Nhập tên hoặc mã chấm công</p>
 
-<input type="text" id="search" placeholder="VD: 5741 hoặc ANH">
+<input type="text" id="search" placeholder="VD: HR028 hoặc VU">
 
 <div id="summary"></div>
 
@@ -88,7 +88,7 @@ th {
 <script>
 let data = [];
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT6pmKN7FtnBUgeQ74wEk3KGL8S4zIK-S3ned-f9GBIGdHKvbUxmRcXSIASmv5T3NO-yvNX1oVTX8qe/pub?gid=0&single=true&output=csv";
+const sheetURL = "https://docs.google.com/spreadsheets/d/1KoSmesbbbAuXyyC04cwk0_OMumdl10IR0Iat52_Tjek/pub?gid=0&single=true&output=csv";
 
 // bỏ dấu tiếng Việt
 function removeVietnamese(str) {
