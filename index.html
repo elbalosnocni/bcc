@@ -267,7 +267,7 @@
     </div>
 
     <script>
-        // URL Web App từ Google Apps Script của bạn
+        // URL Web App từ Google Apps Script
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWrC2s_E9WRa2zF0-9X7iowz6-gjOJ5CRkbATIP2QqKKPZnKVDUt_ggrrckDAJq6xCLA/exec";
 
         let data = [];
@@ -291,7 +291,22 @@
             document.querySelector("#result thead").innerHTML = html;
         }
 
-        // Tìm kiếm dữ liệu
+        // Vẽ/Đổ dữ liệu ra bảng
+        function renderTable(listData) {
+            let html = "";
+            listData.forEach(r => {
+                html += "<tr>";
+                headers.forEach(col => {
+                    html += `<td>${r[col] || ""}</td>`;
+                });
+                html += "</tr>";
+            });
+
+            document.querySelector("#result tbody").innerHTML = html;
+            document.getElementById("summary").innerHTML = `Hiển thị <b>${listData.length}</b> dòng`;
+        }
+
+        // Sự kiện Tìm kiếm dữ liệu
         document.getElementById("search").addEventListener("input", function () {
             const rawKeyword = this.value.trim();
             const keyword = removeVietnamese(rawKeyword.toLowerCase());
@@ -305,17 +320,7 @@
                 });
             }
 
-            let html = "";
-            filtered.forEach(r => {
-                html += "<tr>";
-                headers.forEach(col => {
-                    html += `<td>${r[col] || ""}</td>`;
-                });
-                html += "</tr>";
-            });
-
-            document.querySelector("#result tbody").innerHTML = html;
-            document.getElementById("summary").innerHTML = `Tìm thấy <b>${filtered.length}</b> dòng`;
+            renderTable(filtered);
         });
 
         // 1. Tải danh sách tất cả các tháng khi mở trang
@@ -335,7 +340,7 @@
                         select.appendChild(opt);
                     });
 
-                    // Đọc dữ liệu của tháng đầu tiên
+                    // Đọc và hiển thị ngay dữ liệu của tháng đầu tiên (Tháng mới nhất)
                     loadDataByMonth(months[0]);
                 } else {
                     select.innerHTML = "<option>Không có dữ liệu tháng</option>";
@@ -365,8 +370,13 @@
                         return obj;
                     });
 
+                    // Xóa từ khóa tìm kiếm cũ nếu có
+                    document.getElementById("search").value = "";
+
+                    // Tạo tiêu đề và hiển thị bảng ngay lập tức
                     createHeader();
-                    document.getElementById("search").dispatchEvent(new Event("input"));
+                    renderTable(data);
+
                 } else {
                     document.getElementById("summary").innerText = "Tháng này chưa có dữ liệu!";
                 }
@@ -402,7 +412,7 @@
             const pass = document.getElementById("adminPass").value.trim();
             const errorDiv = document.getElementById("loginError");
 
-            if (user === "admin" && pass === "123456") { // Thay 123456 bằng MK Admin của bạn
+            if (user === "admin" && pass === "123456") { 
                 sessionStorage.setItem("adminPass", pass);
                 window.location.href = "admin.html";
             } else {
