@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản Trị - Cập Nhật Bảng Chấm Công</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 30px; display: flex; justify-content: center; }
+        .admin-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { color: #2e7d32; margin-top: 0; text-align: center; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: bold; margin-bottom: 6px; }
+        input[type="text"], input[type="password"], input[type="file"], select {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;
+        }
+        button {
+            width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; 
+            border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
+        }
+        button:hover { background: #1b5e20; }
+        #status { margin-top: 15px; font-weight: bold; text-align: center; padding: 10px; border-radius: 4px; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .error { background: #ffebee; color: #c62828; }
+        .loading { background: #e3f2fd; color: #1565c0; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>🔐 ADMIN BẢNG CHẤM CÔNG</h2>
+    
+    <div class="form-group">
+        <label>🔑 Mật khẩu Admin:</label>
+        <input type="password" id="adminPass" placeholder="Nhập mật khẩu quản trị">
+    </div>
+
+    <div class="form-group">
+        <label>📅 Chọn Tháng / Bảng Công:</label>
+        <input type="text" id="monthName" placeholder="VD: Tháng 05-2026">
+    </div>
+
+    <div class="form-group">
+        <label>📁 Chọn File Excel (.xlsx / .xls):</label>
+        <input type="file" id="excelFile" accept=".xlsx, .xls">
+    </div>
+
+    <button onclick="uploadData()">🚀 Đẩy Dữ Liệu Lên Sheet</button>
+
+    <div id="status"></div>
+</div>
+
+<!-- Thư viện đọc file Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+    // ⚠️ DÁN URL WEB APP BẠN LẤY ĐƯỢC Ở BƯỚC 1 VÀO ĐÂY
+    const GAS_WEB_APP_URL = "DÁN_LINK_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY";
+
+    async function uploadData() {
+        const pass = document.getElementById("adminPass").value;
+        const month = document.getElementById("monthName").value.trim();
+        const fileInput = document.getElementById("excelFile");
+        const statusDiv = document.getElementById("status");
+
+        if (!pass || !month || fileInput.files.length === 0) {
+            showStatus("Vui lòng điền đầy đủ Mật khẩu, Tháng và chọn File Excel!", "error");
+            return;
+        }
+
+        showStatus("⏳ Đang đọc file Excel...", "loading");
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = async function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // Lấy sheet đầu tiên trong file Excel
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Chuyển dữ liệu Excel thành mảng 2 chiều [[Hàng 1], [Hàng 2], ...]
+                const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                showStatus("🚀 Đang gửi dữ liệu lên Google Sheets...", "loading");
+
+                // Gửi dữ liệu qua Google Apps Script
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        password: pass,
+                        month: month,
+                        rows: rows
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus("✅ " + result.message, "success");
+                    fileInput.value = ""; // Clear file input
+                } else {
+                    showStatus("❌ " + result.message, "error");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showStatus("❌ Lỗi khi xử lý file Excel!", "error");
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    function showStatus(msg, type) {
+        const statusDiv = document.getElementById("status");
+        statusDiv.innerText = msg;
+        statusDiv.className = type;
+    }
+</script>
+
+</body>
+</html>
