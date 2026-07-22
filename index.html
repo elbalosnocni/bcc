@@ -80,16 +80,6 @@ tbody tr:nth-child(even){
     background:#fafafa;
 }
 
-.error{
-    color:#d32f2f;
-    font-weight:bold;
-}
-
-.name-row{
-    background:#dcedc8;
-    font-weight:bold;
-}
-
 #result{
     display:block;
     overflow:auto;
@@ -192,7 +182,7 @@ document.getElementById("search").addEventListener("input", function () {
     document.querySelector("#result tbody").innerHTML = html;
 
     document.getElementById("summary").innerHTML =
-        `<b>Số dòng: ${filtered.length}</b>`;
+    `Tìm thấy <b>${filtered.length}</b> dòng`;
 
 });
 
