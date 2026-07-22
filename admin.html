@@ -80,7 +80,7 @@
 
 <script>
     // URL Web App Apps Script của bạn
-    const GAS_WEB_APP_URL = "DÁN_LINK_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWrC2s_E9WRa2zF0-9X7iowz6-gjOJ5CRkbATIP2QqKKPZnKVDUt_ggrrckDAJq6xCLA/exec";
 
     // KÍCH HOẠT KIỂM TRA ĐĂNG NHẬP KHI MỞ TRANG
     window.onload = function() {
@@ -97,57 +97,81 @@
     }
 
     async function uploadData() {
-        // Tự động lấy mật khẩu đã lưu từ lượt đăng nhập ở index.html
-        const pass = sessionStorage.getItem("adminPass"); 
-        const month = document.getElementById("monthName").value.trim();
-        const fileInput = document.getElementById("excelFile");
+    const pass = sessionStorage.getItem("adminPass"); 
+    const month = document.getElementById("monthName").value.trim();
+    const fileInput = document.getElementById("excelFile");
 
-        if (!month || fileInput.files.length === 0) {
-            showStatus("Vui lòng nhập Tháng và chọn File Excel!", "error");
-            return;
-        }
-
-        showStatus("⏳ Đang đọc file Excel...", "loading");
-
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-
-        reader.onload = async function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                showStatus("🚀 Đang gửi dữ liệu lên Google Sheets...", "loading");
-
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        password: pass,
-                        month: month,
-                        rows: rows
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showStatus("✅ " + result.message, "success");
-                    fileInput.value = "";
-                } else {
-                    showStatus("❌ " + result.message, "error");
-                }
-
-            } catch (err) {
-                console.error(err);
-                showStatus("❌ Lỗi khi xử lý file Excel!", "error");
-            }
-        };
-
-        reader.readAsArrayBuffer(file);
+    if (!month || fileInput.files.length === 0) {
+        showStatus("Vui lòng nhập Tháng và chọn File Excel!", "error");
+        return;
     }
+
+    showStatus("⏳ Đang đọc file Excel...", "loading");
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                showStatus("❌ File Excel trống hoặc không đúng định dạng!", "error");
+                return;
+            }
+
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            // Chuyển Excel sang mảng dữ liệu
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+            showStatus("🚀 Đang gửi dữ liệu lên Google Sheets...", "loading");
+
+            // Gửi dữ liệu tới Google Apps Script
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8" // Tránh bị chặn CORS
+                },
+                body: JSON.stringify({
+                    password: pass,
+                    month: month,
+                    rows: rows
+                })
+            });
+
+            const resultText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(resultText);
+            } catch (pErr) {
+                console.error("Phản hồi từ Server không phải JSON:", resultText);
+                showStatus("❌ Lỗi Server Apps Script! (Xem F12 Console)", "error");
+                return;
+            }
+
+            if (result.success) {
+                showStatus("✅ " + result.message, "success");
+                fileInput.value = "";
+            } else {
+                showStatus("❌ " + result.message, "error");
+            }
+
+        } catch (err) {
+            console.error("Lỗi chi tiết:", err); // In lỗi ra F12 Console để kiểm tra
+            showStatus("❌ Lỗi khi xử lý file Excel! (" + err.message + ")", "error");
+        }
+    };
+
+    reader.onerror = function(ex) {
+        console.error("Lỗi đọc file:", ex);
+        showStatus("❌ Không thể đọc file Excel này!", "error");
+    };
+
+    reader.readAsArrayBuffer(file);
+}
 
     function showStatus(msg, type) {
         const statusDiv = document.getElementById("status");
