@@ -63,16 +63,20 @@
     <div id="status"></div>
 </div>
 
-<!-- MODAL ĐỔI MẬT KHẨU -->
+<!-- MODAL ĐỔI MẬT KHẨU VĨNH VIỄN (ĐÃ CHUẨN ĐỊNH DẠNG) -->
 <div class="modal" id="passModal">
     <div class="modal-content">
         <h3>🔑 Đổi mật khẩu Admin</h3>
+        <div class="form-group">
+            <label>Mật khẩu cũ:</label>
+            <input type="password" id="oldPass" placeholder="Nhập mật khẩu cũ">
+        </div>
         <div class="form-group">
             <label>Mật khẩu mới:</label>
             <input type="password" id="newPass" placeholder="Nhập mật khẩu mới">
         </div>
         <div style="display: flex; gap: 10px;">
-            <button class="btn-upload" onclick="saveNewPass()">Lưu</button>
+            <button class="btn-upload" onclick="saveNewPass()">Lưu Vĩnh Viễn</button>
             <button class="btn-upload" style="background:#757575;" onclick="closeChangePassModal()">Hủy</button>
         </div>
     </div>
@@ -84,7 +88,7 @@
     // URL Web App Apps Script
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWrC2s_E9WRa2zF0-9X7iowz6-gjOJ5CRkbATIP2QqKKPZnKVDUt_ggrrckDAJq6xCLA/exec";
 
-    // Tự động tạo danh sách 12 tháng gần nhất (Tránh gõ sai)
+    // Tự động tạo danh sách 12 tháng của năm hiện tại
     function generateMonthOptions() {
         const select = document.getElementById("monthInput");
         select.innerHTML = "";
@@ -92,7 +96,6 @@
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         
-        // Tạo danh sách từ tháng 01 đến tháng 12 của năm hiện tại
         for (let m = 1; m <= 12; m++) {
             const monthStr = m < 10 ? `0${m}` : `${m}`;
             const optVal = `Tháng ${monthStr}-${currentYear}`;
@@ -101,7 +104,6 @@
             opt.value = optVal;
             opt.innerText = optVal;
             
-            // Mặc định chọn tháng hiện tại
             if (m === (currentDate.getMonth() + 1)) {
                 opt.selected = true;
             }
@@ -116,7 +118,7 @@
             alert("Bạn chưa đăng nhập!");
             window.location.href = "index.html";
         } else {
-            generateMonthOptions(); // Khai báo menu tháng
+            generateMonthOptions();
         }
     };
 
@@ -127,7 +129,6 @@
 
     async function uploadData(confirmOverwrite = false) {
         const pass = sessionStorage.getItem("adminPass"); 
-        // 🟢 Đã sửa ID thành monthInput chuẩn xác
         const monthSelect = document.getElementById("monthInput");
         const month = monthSelect ? monthSelect.value : "";
         const fileInput = document.getElementById("excelFile");
@@ -161,10 +162,9 @@
 
                 const result = await response.json();
 
-                // ⚠️ Nếu phát hiện trùng tháng -> Bật hộp thoại hỏi Admin
                 if (!result.success && result.isDuplicate) {
                     if (confirm(result.message)) {
-                        uploadData(true); // Xác nhận ghi đè
+                        uploadData(true);
                     } else {
                         showStatus("❌ Đã hủy thao tác cập nhật trùng tháng.", "error");
                     }
@@ -193,18 +193,53 @@
     }
 
     // Modal Đổi Mật Khẩu
-    function openChangePassModal() { document.getElementById("passModal").style.display = "flex"; }
-    function closeChangePassModal() { document.getElementById("passModal").style.display = "none"; }
+    function openChangePassModal() { 
+        document.getElementById("passModal").style.display = "flex"; 
+    }
+    
+    function closeChangePassModal() { 
+        document.getElementById("passModal").style.display = "none"; 
+        document.getElementById("oldPass").value = "";
+        document.getElementById("newPass").value = "";
+    }
 
-    function saveNewPass() {
+    // Hàm đổi mật khẩu vĩnh viễn trực tiếp lên Google Sheet
+    async function saveNewPass() {
+        const oldPass = document.getElementById("oldPass").value.trim();
         const newPass = document.getElementById("newPass").value.trim();
-        if(!newPass) {
-            alert("Vui lòng nhập mật khẩu mới!");
+
+        if (!oldPass || !newPass) {
+            alert("Vui lòng nhập đầy đủ mật khẩu cũ và mật khẩu mới!");
             return;
         }
-        sessionStorage.setItem("adminPass", newPass);
-        alert("Đã đổi mật khẩu tạm thời thành công! Hãy cập nhật mật khẩu này trong file Google Apps Script của bạn.");
-        closeChangePassModal();
+
+        showStatus("⏳ Đang đổi mật khẩu...", "loading");
+
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "changePassword",
+                    oldPassword: oldPass,
+                    newPassword: newPass
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                sessionStorage.setItem("adminPass", newPass); // Cập nhật lại mật khẩu cho phiên làm việc hiện tại
+                alert("✅ " + result.message);
+                closeChangePassModal();
+                showStatus("✅ Đã cập nhật mật khẩu mới!", "success");
+            } else {
+                alert("❌ " + result.message);
+                showStatus("❌ " + result.message, "error");
+            }
+        } catch (err) {
+            alert("❌ Lỗi kết nối máy chủ!");
+            showStatus("❌ Lỗi kết nối máy chủ!", "error");
+        }
     }
 </script>
 
