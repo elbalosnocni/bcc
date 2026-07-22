@@ -135,7 +135,12 @@
         <div class="form-group">
             <label>📅 Chọn Tháng / Bảng Công Tải Lên:</label>
             <select id="monthSelect">
-                <!-- Sẽ tự động tạo danh sách các tháng -->
+                <!-- Dự phòng danh sách tháng sẵn có -->
+                <option value="Tháng 07-2026">Tháng 07-2026</option>
+                <option value="Tháng 06-2026">Tháng 06-2026</option>
+                <option value="Tháng 05-2026">Tháng 05-2026</option>
+                <option value="Tháng 04-2026">Tháng 04-2026</option>
+                <option value="Tháng 03-2026">Tháng 03-2026</option>
             </select>
         </div>
 
@@ -188,35 +193,38 @@
             window.location.href = "index.html";
         }
 
-        // Tự động tạo danh sách 12 tháng gần nhất cho ô chọn
-        function generateMonthOptions() {
-            const select = document.getElementById("monthSelect");
-            select.innerHTML = "";
-            const now = new Date();
+        // Tự động cập nhật danh sách 12 tháng động tính từ thời điểm hiện tại
+        document.addEventListener("DOMContentLoaded", function () {
+            try {
+                const select = document.getElementById("monthSelect");
+                if (!select) return;
 
-            for (let i = 0; i < 12; i++) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                const monthVal = `Tháng ${month}-${year}`;
+                const now = new Date();
+                let optionsHtml = "";
 
-                const opt = document.createElement("option");
-                opt.value = monthVal;
-                opt.innerText = monthVal;
-                select.appendChild(opt);
+                for (let i = 0; i < 12; i++) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    const monthVal = `Tháng ${month}-${year}`;
+
+                    optionsHtml += `<option value="${monthVal}">${monthVal}</option>`;
+                }
+
+                select.innerHTML = optionsHtml;
+            } catch (err) {
+                console.error("Lỗi khi tạo danh sách tháng:", err);
             }
-        }
-        generateMonthOptions();
+        });
 
-        // 🟢 HÀM TẠO VÀ TẢI FILE EXCEL MẪU TRỰC TIẾP
+        // 🟢 HÀM TẠO VÀ TẢI FILE EXCEL MẪU TRỰC TIẾP (Đã sửa lỗi cú pháp)
         function downloadSampleExcel(e) {
             e.preventDefault();
             
-            // Cấu trúc bảng mẫu - Bạn có thể chỉnh sửa/thêm bớt tên các cột theo nhu cầu thực tế
             const sampleData = [
-                ["STT", "Họ và Tên", "Mã", "Công", "Ngày lễ", "Nghỉ hưởng lương 100%", "Nghỉ không hưởng lương", "Nghỉ hưởng lương tối thiểu vùng",	"TĂNG CA (giờ)", "TĂNG CA ĐÊM (giờ)", "CA ĐÊM", "LÀM VÀO NGÀY NGHỈ (giờ)", "OT NGÀY NGHỈ (giờ)",	"LÀM NGÀY LỄ (giờ)", "OT NGÀY LỄ (giờ)", "TĂNG CA ĐÊM LỄ"],
-                ["1", "NGUYỄN THỊ A", "PL000", "24,"24",	"24", "24", "24", "24", "24", "24", "24", "24", "24", "24", "24"],
-                ["2", "TRẦN VĂN B", "PR000", "24,"24",	"24", "24", "24", "24", "24", "24", "24", "24", "24", "24", "24"]
+                ["STT", "Họ và Tên", "Mã", "Công", "Ngày lễ", "Nghỉ hưởng lương 100%", "Nghỉ không hưởng lương", "Nghỉ hưởng lương tối thiểu vùng", "TĂNG CA (giờ)", "TĂNG CA ĐÊM (giờ)", "CA ĐÊM", "LÀM VÀO NGÀY NGHỈ (giờ)", "OT NGÀY NGHỈ (giờ)", "LÀM NGÀY LỄ (giờ)", "OT NGÀY LỄ (giờ)", "TĂNG CA ĐÊM LỄ"],
+                ["1", "NGUYỄN THỊ A", "PL000", "24", "0", "0", "0", "0", "4", "0", "0", "0", "0", "0", "0", "0"],
+                ["2", "TRẦN VĂN B", "PR000", "26", "0", "0", "0", "0", "8", "2", "0", "0", "0", "0", "0", "0"]
             ];
 
             // Dùng thư viện XLSX tạo sheet & workbook
@@ -224,7 +232,7 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "BangChamCong");
 
-            // Xuất file tải về máy người dùng
+            // Xuất file tải về máy
             XLSX.writeFile(wb, "File_Mau_Bang_Cham_Cong.xlsx");
         }
 
@@ -282,7 +290,7 @@
                         fileInput.value = "";
                     } else if (result.isDuplicate) {
                         if (confirm(result.message)) {
-                            uploadData(true); // Nếu bấm OK thì thực hiện ghi đè
+                            uploadData(true);
                         } else {
                             showStatus("ℹ️ Đã hủy thao tác cập nhật.", "#fff3cd", "#856404");
                         }
