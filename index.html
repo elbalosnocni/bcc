@@ -224,6 +224,14 @@
 
     <input type="text" id="search" placeholder="VD: HR028 hoặc NGUYEN VAN VU">
 
+    <!-- MENU CHỌN THÁNG -->
+    <div style="margin: 15px 0;">
+        <label for="monthSelect" style="font-weight: bold; margin-right: 8px;">📅 Chọn Tháng xem công:</label>
+        <select id="monthSelect" onchange="changeMonth()" style="padding: 8px 12px; font-size: 15px; border-radius: 6px; border: 1px solid #007bff; background: #fff; cursor: pointer;">
+            <option value="">⏳ Đang tải danh sách tháng...</option>
+        </select>
+    </div>
+
     <div id="summary"></div>
 
     <!-- BẢNG DỮ LIỆU -->
@@ -258,15 +266,14 @@
         </div>
     </div>
 
-    <!-- SCRIPTS -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
     <script>
-        // --- 1. DỮ LIỆU BẢNG TÌM KIẾM ---
+        // URL Web App từ Google Apps Script của bạn
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWrC2s_E9WRa2zF0-9X7iowz6-gjOJ5CRkbATIP2QqKKPZnKVDUt_ggrrckDAJq6xCLA/exec";
+
         let data = [];
         let headers = [];
-        const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1Wr62GWAavPWXr4Q3SpSL4JhYIc7z8aiKgWzcJahft45bmxvPnBD7qFHCEMNWhXtBaTCIbDgbV6lh/pub?gid=0&single=true&output=csv";
 
+        // Hàm xóa dấu tiếng Việt
         function removeVietnamese(str) {
             return (str || "")
                 .normalize("NFD")
@@ -275,6 +282,7 @@
                 .replace(/Đ/g, "D");
         }
 
+        // Tạo tiêu đề bảng
         function createHeader() {
             if (!headers || headers.length === 0) return;
             let html = "<tr>";
@@ -283,6 +291,7 @@
             document.querySelector("#result thead").innerHTML = html;
         }
 
+        // Tìm kiếm dữ liệu
         document.getElementById("search").addEventListener("input", function () {
             const rawKeyword = this.value.trim();
             const keyword = removeVietnamese(rawKeyword.toLowerCase());
@@ -309,23 +318,76 @@
             document.getElementById("summary").innerHTML = `Tìm thấy <b>${filtered.length}</b> dòng`;
         });
 
-        function loadData() {
-            fetch(sheetURL)
-                .then(res => res.text())
-                .then(csv => {
-                    const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
-                    data = parsed.data;
-                    headers = parsed.meta.fields;
-                    createHeader();
-                    document.getElementById("search").dispatchEvent(new Event("input"));
-                })
-                .catch(err => console.error("Lỗi tải dữ liệu:", err));
+        // 1. Tải danh sách tất cả các tháng khi mở trang
+        async function loadMonthList() {
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?action=getMonths`);
+                const months = await res.json();
+                
+                const select = document.getElementById("monthSelect");
+                select.innerHTML = "";
+                
+                if (Array.isArray(months) && months.length > 0) {
+                    months.forEach(m => {
+                        const opt = document.createElement("option");
+                        opt.value = m;
+                        opt.innerText = m;
+                        select.appendChild(opt);
+                    });
+
+                    // Đọc dữ liệu của tháng đầu tiên
+                    loadDataByMonth(months[0]);
+                } else {
+                    select.innerHTML = "<option>Không có dữ liệu tháng</option>";
+                }
+            } catch (err) {
+                console.error("Lỗi lấy danh sách tháng:", err);
+                document.getElementById("summary").innerText = "❌ Lỗi tải danh sách tháng!";
+            }
         }
 
-        loadData();
-        setInterval(loadData, 60000);
+        // 2. Lấy dữ liệu công của tháng chọn từ Apps Script
+        async function loadDataByMonth(monthName) {
+            document.getElementById("summary").innerHTML = "⏳ Đang tải dữ liệu...";
+            document.querySelector("#result tbody").innerHTML = "";
 
-        // --- 2. XỬ LÝ MODAL POPUP ĐĂNG NHẬP ---
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?month=${encodeURIComponent(monthName)}`);
+                const rawRows = await res.json();
+
+                if (rawRows && rawRows.length > 0) {
+                    headers = rawRows[0]; // Dòng 1 là Tiêu đề
+                    data = rawRows.slice(1).map(row => {
+                        let obj = {};
+                        headers.forEach((h, index) => {
+                            obj[h] = row[index] || "";
+                        });
+                        return obj;
+                    });
+
+                    createHeader();
+                    document.getElementById("search").dispatchEvent(new Event("input"));
+                } else {
+                    document.getElementById("summary").innerText = "Tháng này chưa có dữ liệu!";
+                }
+            } catch (err) {
+                console.error("Lỗi tải dữ liệu tháng:", err);
+                document.getElementById("summary").innerText = "❌ Lỗi khi tải bảng công!";
+            }
+        }
+
+        // Chuyển tháng khi người dùng chọn Dropdown
+        function changeMonth() {
+            const selectedMonth = document.getElementById("monthSelect").value;
+            if (selectedMonth) {
+                loadDataByMonth(selectedMonth);
+            }
+        }
+
+        // --- BẮT ĐẦU CHẠY KHI MỞ TRANG ---
+        loadMonthList();
+
+        // --- XỬ LÝ MODAL POPUP ĐĂNG NHẬP ADMIN ---
         function openLoginModal() {
             document.getElementById("loginModal").classList.add("active");
         }
@@ -336,21 +398,17 @@
         }
 
         function handleLogin() {
-    const user = document.getElementById("adminUser").value.trim();
-    const pass = document.getElementById("adminPass").value.trim();
-    const errorDiv = document.getElementById("loginError");
+            const user = document.getElementById("adminUser").value.trim();
+            const pass = document.getElementById("adminPass").value.trim();
+            const errorDiv = document.getElementById("loginError");
 
-    if (user === "admin" && pass === "123456") { // Thay 123456 bằng MK của bạn
-        // Lưu mật khẩu vào bộ nhớ phiên làm việc
-        sessionStorage.setItem("adminPass", pass);
-        
-        // Chuyển hướng sang trang admin
-        window.location.href = "admin.html";
-    } else {
-        errorDiv.style.display = "block";
-    }
-}
+            if (user === "admin" && pass === "123456") { // Thay 123456 bằng MK Admin của bạn
+                sessionStorage.setItem("adminPass", pass);
+                window.location.href = "admin.html";
+            } else {
+                errorDiv.style.display = "block";
+            }
+        }
     </script>
-
 </body>
 </html>
