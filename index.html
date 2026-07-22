@@ -253,7 +253,7 @@ function loadData() {
 }
 
 loadData();
-
+document.getElementById("search").dispatchEvent(new Event("input"));
 setInterval(loadData,60000);
 
 </script>
