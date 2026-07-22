@@ -77,87 +77,121 @@ th {
 
 <script>
 let data = [];
+let headers = [];
 
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1Wr62GWAavPWXr4Q3SpSL4JhYIc7z8aiKgWzcJahft45bmxvPnBD7qFHCEMNWhXtBaTCIbDgbV6lh/pub?gid=0&single=true&output=csv";
 
-// bỏ dấu tiếng Việt
-function removeVietnamese(str) {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+function removeVietnamese(str){
+    return (str || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"");
 }
 
-// load data
+// Load dữ liệu
 fetch(sheetURL)
-.then(res => res.text())
-.then(csv => {
-    const parsed = Papa.parse(csv, {
-        header: true,
-        skipEmptyLines: true
+.then(res=>res.text())
+.then(csv=>{
+
+    const parsed = Papa.parse(csv,{
+        header:true,
+        skipEmptyLines:true
     });
 
     data = parsed.data;
+    headers = parsed.meta.fields;
+
+    createHeader();
 });
 
-// search
-document.getElementById('search').addEventListener('input', function() {
+function createHeader(){
 
-    let keyword = removeVietnamese(this.value.toLowerCase());
+    let html="<tr>";
 
-    let filtered = data.filter(d => {
-        let ma = d["Mã"] || "";
-        let ten = d["Họ và Tên"] || "";
-
-        return removeVietnamese(ma.toLowerCase()).includes(keyword) ||
-               removeVietnamese(ten.toLowerCase()).includes(keyword);
+    headers.forEach(h=>{
+        html+=`<th>${h}</th>`;
     });
 
-    // GROUP THEO NHÂN VIÊN
-    let grouped = {};
+    html+="</tr>";
 
-    filtered.forEach(d => {
-        let key = d["Mã"] + "_" + d["Họ và Tên"];
+    document.querySelector("#result thead").innerHTML=html;
+}
 
-        if (!grouped[key]) {
-            grouped[key] = [];
-        }
+document.getElementById("search").addEventListener("input",function(){
 
-        grouped[key].push(d);
+    const keyword = removeVietnamese(this.value.toLowerCase());
+
+    const filtered = data.filter(r=>{
+
+        return headers.some(col=>{
+
+            return removeVietnamese(String(r[col]||"").toLowerCase())
+                    .includes(keyword);
+
+        });
+
     });
 
-    let html = "";
-    let total = 0;
+    let grouped={};
 
-    for (let key in grouped) {
-        let rows = grouped[key];
+    filtered.forEach(r=>{
 
-        // dòng tiêu đề nhân viên
-        html += `
+        const key=(r["Mã"]||"")+"_"+(r["Họ và Tên"]||"");
+
+        if(!grouped[key])
+            grouped[key]=[];
+
+        grouped[key].push(r);
+
+    });
+
+    let html="";
+    let total=0;
+
+    for(const key in grouped){
+
+        const rows=grouped[key];
+
+        html+=`
         <tr class="name-row">
-            <td colspan="7">${rows[0]["Họ và Tên"]} (Mã: ${rows[0]["Mã"]}) - Tổng lỗi: ${rows.length}</td>
+            <td colspan="${headers.length}">
+                ${rows[0]["Họ và Tên"]} (Mã: ${rows[0]["Mã"]})
+                - Tổng lỗi: ${rows.length}
+            </td>
         </tr>
         `;
 
-        rows.forEach(d => {
+        rows.forEach(r=>{
+
             total++;
 
-            html += `
-            <tr>
-                <td>${d["Ngày"] || ""}</td>
-                <td>${d["Mã"] || ""}</td>
-                <td>${d["Họ và Tên"] || ""}</td>
-                <td>${d["Phòng"] || ""}</td>
-                <td>${d["Bộ phận"] || ""}</td>
-                <td class="error">${d["Lỗi"] || ""}</td>
-                <td>${d["Ghi Chú"] || ""}</td>
-            </tr>`;
+            html+="<tr>";
+
+            headers.forEach(col=>{
+
+                let value=r[col]||"";
+
+                if(col==="Lỗi"){
+                    html+=`<td class="error">${value}</td>`;
+                }else{
+                    html+=`<td>${value}</td>`;
+                }
+
+            });
+
+            html+="</tr>";
+
         });
+
     }
 
-    document.querySelector("#result tbody").innerHTML = html;
-    document.getElementById("summary").innerText = "Tổng số lỗi: " + total;
+    document.querySelector("#result tbody").innerHTML=html;
+
+    document.getElementById("summary").innerHTML=
+        `<b>Tổng số lỗi: ${total}</b>`;
+
 });
 
-// auto refresh 60s
-setInterval(() => location.reload(), 60000);
+setInterval(()=>location.reload(),60000);
 
 </script>
 
