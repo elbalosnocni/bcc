@@ -97,7 +97,7 @@ tbody tr:nth-child(even){
 </div>    
 <p>Nhập tên hoặc mã chấm công</p>
 
-<input type="text" id="" placeholder="VD: HR028 hoặc VU">
+<input type="text" id="search" placeholder="VD: HR028 hoặc NGUYEN VAN VU">
 
 <div id="summary"></div>
 
@@ -190,6 +190,7 @@ function loadData() {
     fetch(sheetURL)
     .then(res => res.text())
     .then(csv => {
+
         const parsed = Papa.parse(csv,{
             header:true,
             skipEmptyLines:true
@@ -199,11 +200,14 @@ function loadData() {
         headers = parsed.meta.fields;
 
         createHeader();
+
+        // Hiển thị theo từ khóa đang nhập
+        document.getElementById("search")
+            .dispatchEvent(new Event("input"));
     });
 }
-
+    
 loadData();
-document.getElementById("search").dispatchEvent(new Event("input"));
 setInterval(loadData,60000);
 
 </script>
