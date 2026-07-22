@@ -14,7 +14,6 @@
             padding: 20px;
         }
 
-        /* --- HEADER & NÚT BÁNH RĂNG --- */
         .header-container {
             position: relative;
             background: #1b4985;
@@ -25,12 +24,8 @@
             margin: 0 auto 20px auto;
         }
 
-        .header-container h2 {
-            margin: 0 0 5px 0;
-            font-size: 22px;
-        }
+        .header-container h2 { margin: 0 0 5px 0; font-size: 22px; }
 
-        /* Nút Bánh răng Admin góc trên bên phải */
         .admin-gear-btn {
             position: absolute;
             top: 15px;
@@ -43,13 +38,9 @@
             transition: transform 0.3s ease, color 0.3s ease;
         }
 
-        .admin-gear-btn:hover {
-            color: #ffffff;
-            transform: rotate(45deg);
-        }
+        .admin-gear-btn:hover { color: #ffffff; transform: rotate(45deg); }
 
-        /* --- FORM TÌM KIẾM & BẢNG DỮ LIỆU --- */
-        input[type="text"] {
+        input[type="text"], input[type="password"] {
             padding: 10px;
             width: 320px;
             max-width: 90%;
@@ -59,10 +50,7 @@
             border-radius: 4px;
         }
 
-        #summary {
-            margin: 10px 0;
-            font-weight: bold;
-        }
+        #summary { margin: 10px 0; font-weight: bold; }
 
         .table-container {
             max-height: 650px;
@@ -74,157 +62,62 @@
             border-radius: 6px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 8px; white-space: nowrap; }
+        thead { position: sticky; top: 0; z-index: 10; }
+        th { background: #2e7d32; color: #fff; }
+        tbody tr:nth-child(even) { background: #fafafa; }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            white-space: nowrap;
-        }
-
-        thead {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        th {
-            background: #2e7d32;
-            color: #fff;
-        }
-
-        tbody tr:nth-child(even) {
-            background: #fafafa;
-        }
-
-        /* --- POPUP MODAL ĐĂNG NHẬP ADMIN --- */
+        /* MODAL POPUP */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; visibility: hidden; opacity: 0;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
-        .modal-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
 
         .modal-card {
-            background: white;
-            width: 90%;
-            max-width: 380px;
-            padding: 25px 20px;
-            border-radius: 12px;
+            background: white; width: 90%; max-width: 380px;
+            padding: 25px 20px; border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-            text-align: left;
+            position: relative; text-align: left;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #888;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 5px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-            margin-top: 0;
-        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; font-size: 18px; color: #333; }
+        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin-top: 0; }
 
         .btn-login {
-            width: 100%;
-            padding: 12px;
-            background: #1877f2;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 5px;
+            width: 100%; padding: 12px; background: #1877f2; color: white;
+            border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 5px;
         }
-
-        .btn-login:hover {
-            background: #166fe5;
-        }
-
-        .login-error {
-            color: #d32f2f;
-            font-size: 13px;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
-        }
+        .btn-login:hover { background: #166fe5; }
+        .login-error { color: #d32f2f; font-size: 13px; margin-top: 10px; text-align: center; display: none; }
     </style>
 </head>
 
 <body>
 
-    <!-- HEADER + NÚT BÁNH RĂNG -->
     <div class="header-container">
         <h2>🔎 BẢNG CHẤM CÔNG</h2>
         <div style="font-size: 13px; opacity: 0.9;">Hệ thống Tra cứu Công & Tải dữ liệu</div>
-        
-        <!-- Nút Bánh răng -->
         <button class="admin-gear-btn" onclick="openLoginModal()" title="Đăng nhập Quản trị">⚙</button>
     </div>
 
-    <!-- QR CODE & TÌM KIẾM -->
     <div style="margin-top:10px">
         <p style="margin:5px 0;">📱 Quét QR để tra cứu nhanh</p>
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://elbalosnocni.github.io/bcc/" alt="QR Code">
     </div>    
+    
     <p style="margin-top: 15px;">Nhập tên hoặc mã chấm công</p>
-
     <input type="text" id="search" placeholder="VD: HR028 hoặc NGUYEN VAN VU">
 
-    <!-- MENU CHỌN THÁNG -->
     <div style="margin: 15px 0;">
         <label for="monthSelect" style="font-weight: bold; margin-right: 8px;">📅 Chọn Tháng xem công:</label>
         <select id="monthSelect" onchange="changeMonth()" style="padding: 8px 12px; font-size: 15px; border-radius: 6px; border: 1px solid #007bff; background: #fff; cursor: pointer;">
@@ -234,7 +127,6 @@
 
     <div id="summary"></div>
 
-    <!-- BẢNG DỮ LIỆU -->
     <div class="table-container">
         <table id="result">
             <thead></thead>
@@ -251,29 +143,22 @@
             </div>
             
             <div class="form-group">
-                <label>Tài khoản</label>
-                <input type="text" id="adminUser" placeholder="Username">
-            </div>
-
-            <div class="form-group">
-                <label>Mật khẩu</label>
-                <input type="password" id="adminPass" placeholder="Password">
+                <label>Mật khẩu Admin</label>
+                <input type="password" id="adminPass" placeholder="Nhập mật khẩu">
             </div>
 
             <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
             
-            <div class="login-error" id="loginError">Sai tài khoản hoặc mật khẩu!</div>
+            <div class="login-error" id="loginError"></div>
         </div>
     </div>
 
     <script>
-        // URL Web App từ Google Apps Script
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWrC2s_E9WRa2zF0-9X7iowz6-gjOJ5CRkbATIP2QqKKPZnKVDUt_ggrrckDAJq6xCLA/exec";
 
         let data = [];
         let headers = [];
 
-        // Hàm xóa dấu tiếng Việt
         function removeVietnamese(str) {
             return (str || "")
                 .normalize("NFD")
@@ -282,7 +167,6 @@
                 .replace(/Đ/g, "D");
         }
 
-        // Tạo tiêu đề bảng
         function createHeader() {
             if (!headers || headers.length === 0) return;
             let html = "<tr>";
@@ -291,7 +175,6 @@
             document.querySelector("#result thead").innerHTML = html;
         }
 
-        // Vẽ/Đổ dữ liệu ra bảng
         function renderTable(listData) {
             let html = "";
             listData.forEach(r => {
@@ -306,7 +189,6 @@
             document.getElementById("summary").innerHTML = `Hiển thị <b>${listData.length}</b> dòng`;
         }
 
-        // Sự kiện Tìm kiếm dữ liệu
         document.getElementById("search").addEventListener("input", function () {
             const rawKeyword = this.value.trim();
             const keyword = removeVietnamese(rawKeyword.toLowerCase());
@@ -323,7 +205,6 @@
             renderTable(filtered);
         });
 
-        // 1. Tải danh sách tất cả các tháng khi mở trang
         async function loadMonthList() {
             try {
                 const res = await fetch(`${GAS_WEB_APP_URL}?action=getMonths`);
@@ -339,8 +220,6 @@
                         opt.innerText = m;
                         select.appendChild(opt);
                     });
-
-                    // Đọc và hiển thị ngay dữ liệu của tháng đầu tiên (Tháng mới nhất)
                     loadDataByMonth(months[0]);
                 } else {
                     select.innerHTML = "<option>Không có dữ liệu tháng</option>";
@@ -351,7 +230,6 @@
             }
         }
 
-        // 2. Lấy dữ liệu công của tháng chọn từ Apps Script
         async function loadDataByMonth(monthName) {
             document.getElementById("summary").innerHTML = "⏳ Đang tải dữ liệu...";
             document.querySelector("#result tbody").innerHTML = "";
@@ -361,7 +239,7 @@
                 const rawRows = await res.json();
 
                 if (rawRows && rawRows.length > 0) {
-                    headers = rawRows[0]; // Dòng 1 là Tiêu đề
+                    headers = rawRows[0];
                     data = rawRows.slice(1).map(row => {
                         let obj = {};
                         headers.forEach((h, index) => {
@@ -370,13 +248,9 @@
                         return obj;
                     });
 
-                    // Xóa từ khóa tìm kiếm cũ nếu có
                     document.getElementById("search").value = "";
-
-                    // Tạo tiêu đề và hiển thị bảng ngay lập tức
                     createHeader();
                     renderTable(data);
-
                 } else {
                     document.getElementById("summary").innerText = "Tháng này chưa có dữ liệu!";
                 }
@@ -386,7 +260,6 @@
             }
         }
 
-        // Chuyển tháng khi người dùng chọn Dropdown
         function changeMonth() {
             const selectedMonth = document.getElementById("monthSelect").value;
             if (selectedMonth) {
@@ -394,10 +267,8 @@
             }
         }
 
-        // --- BẮT ĐẦU CHẠY KHI MỞ TRANG ---
         loadMonthList();
 
-        // --- XỬ LÝ MODAL POPUP ĐĂNG NHẬP ADMIN ---
         function openLoginModal() {
             document.getElementById("loginModal").classList.add("active");
         }
@@ -405,18 +276,45 @@
         function closeLoginModal() {
             document.getElementById("loginModal").classList.remove("active");
             document.getElementById("loginError").style.display = "none";
+            document.getElementById("adminPass").value = "";
         }
 
-        function handleLogin() {
-            const user = document.getElementById("adminUser").value.trim();
-            const pass = document.getElementById("adminPass").value.trim();
-            const errorDiv = document.getElementById("loginError");
+        // HÀM XÁC THỰC ĐĂNG NHẬP MỚI VỚI APPS SCRIPT
+        async function handleLogin() {
+            const passwordInput = document.getElementById("adminPass").value.trim();
+            const errorMsg = document.getElementById("loginError");
 
-            if (user === "admin" && pass === "123456") { 
-                sessionStorage.setItem("adminPass", pass);
-                window.location.href = "admin.html";
-            } else {
-                errorDiv.style.display = "block";
+            if (!passwordInput) {
+                alert("Vui lòng nhập mật khẩu!");
+                return;
+            }
+
+            errorMsg.style.display = "block";
+            errorMsg.style.color = "#1565c0";
+            errorMsg.innerText = "⏳ Đang kiểm tra mật khẩu...";
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "checkPassword",
+                        password: passwordInput
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    sessionStorage.setItem("adminPass", passwordInput);
+                    window.location.href = "admin.html";
+                } else {
+                    errorMsg.style.color = "#d32f2f";
+                    errorMsg.innerText = "❌ " + (result.message || "Mật khẩu không chính xác!");
+                }
+            } catch (err) {
+                console.error(err);
+                errorMsg.style.color = "#d32f2f";
+                errorMsg.innerText = "❌ Lỗi kết nối máy chủ!";
             }
         }
     </script>
