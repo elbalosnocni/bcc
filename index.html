@@ -107,7 +107,7 @@ tbody tr:nth-child(even){
 </div>    
 <p>Nhập tên hoặc mã chấm công</p>
 
-<input type="text" id="search" placeholder="VD: HR028 hoặc VU">
+<input type="text" id="" placeholder="VD: HR028 hoặc VU">
 
 <div id="summary"></div>
 
@@ -161,78 +161,38 @@ function createHeader(){
     document.querySelector("#result thead").innerHTML=html;
 }
 
-document.getElementById("search").addEventListener("input",function(){
+document.getElementById("search").addEventListener("input", function () {
 
     const keyword = removeVietnamese(this.value.toLowerCase());
 
-    const filtered = data.filter(r=>{
+    const filtered = data.filter(r => {
+        return headers.some(col =>
+            removeVietnamese(String(r[col] || "").toLowerCase()).includes(keyword)
+        );
+    });
 
-        return headers.some(col=>{
+    let html = "";
 
-            return removeVietnamese(String(r[col]||"").toLowerCase())
-                    .includes(keyword);
+    filtered.forEach(r => {
+
+        html += "<tr>";
+
+        headers.forEach(col => {
+
+            const value = r[col] || "";
+
+            html += `<td>${value}</td>`;
 
         });
 
-    });
-
-    let grouped={};
-
-    filtered.forEach(r=>{
-
-        const key=(r["Mã"]||"")+"_"+(r["Họ và Tên"]||"");
-
-        if(!grouped[key])
-            grouped[key]=[];
-
-        grouped[key].push(r);
+        html += "</tr>";
 
     });
 
-    let html="";
-    let total=0;
+    document.querySelector("#result tbody").innerHTML = html;
 
-    for(const key in grouped){
-
-        const rows=grouped[key];
-
-        html+=`
-        <tr class="name-row">
-            <td colspan="${headers.length}">
-                ${rows[0]["Họ và Tên"]} (Mã: ${rows[0]["Mã"]})
-                - Tổng lỗi: ${rows.length}
-            </td>
-        </tr>
-        `;
-
-        rows.forEach(r=>{
-
-            total++;
-
-            html+="<tr>";
-
-            headers.forEach(col=>{
-
-                let value=r[col]||"";
-
-                if(col==="Lỗi"){
-                    html+=`<td class="error">${value}</td>`;
-                }else{
-                    html+=`<td>${value}</td>`;
-                }
-
-            });
-
-            html+="</tr>";
-
-        });
-
-    }
-
-    document.querySelector("#result tbody").innerHTML=html;
-
-    document.getElementById("summary").innerHTML=
-        `<b>Tổng số lỗi: ${total}</b>`;
+    document.getElementById("summary").innerHTML =
+        `<b>Số dòng: ${filtered.length}</b>`;
 
 });
 
