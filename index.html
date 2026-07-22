@@ -14,16 +14,47 @@
             padding: 20px;
         }
 
-        h2 {
-            margin-top: 0;
+        /* --- HEADER & NÚT BÁNH RĂNG --- */
+        .header-container {
+            position: relative;
+            background: #1b4985;
+            color: white;
+            padding: 20px 15px;
+            border-radius: 12px;
+            max-width: 800px;
+            margin: 0 auto 20px auto;
         }
 
-        input {
+        .header-container h2 {
+            margin: 0 0 5px 0;
+            font-size: 22px;
+        }
+
+        /* Nút Bánh răng Admin góc trên bên phải */
+        .admin-gear-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .admin-gear-btn:hover {
+            color: #ffffff;
+            transform: rotate(45deg);
+        }
+
+        /* --- FORM TÌM KIẾM & BẢNG DỮ LIỆU --- */
+        input[type="text"] {
             padding: 10px;
             width: 320px;
             max-width: 90%;
             font-size: 16px;
-            margin-top: 15px;
+            margin-top: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
@@ -33,7 +64,6 @@
             font-weight: bold;
         }
 
-        /* Container cuộn cho bảng - Giúp giữ lại Sticky Header */
         .table-container {
             max-height: 650px;
             overflow: auto;
@@ -41,6 +71,7 @@
             margin: 20px auto;
             border: 1px solid #ddd;
             background: #fff;
+            border-radius: 6px;
         }
 
         table {
@@ -55,7 +86,6 @@
             white-space: nowrap;
         }
 
-        /* Cố định tiêu đề khi cuộn xuống */
         thead {
             position: sticky;
             top: 0;
@@ -71,31 +101,132 @@
             background: #fafafa;
         }
 
-        .name-row {
-            background: #e8f5e9;
-            font-weight: bold;
+        /* --- POPUP MODAL ĐĂNG NHẬP ADMIN --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
-        .error {
-            color: red;
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-card {
+            background: white;
+            width: 90%;
+            max-width: 380px;
+            padding: 25px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            text-align: left;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 0;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .btn-login:hover {
+            background: #166fe5;
+        }
+
+        .login-error {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
         }
     </style>
 </head>
 
 <body>
 
-    <h2>🔎 BẢNG CHẤM CÔNG</h2>
-    <div style="margin-top:10px">
-        <p>📱 Quét QR để tra cứu nhanh</p>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://elbalosnocni.github.io/bcc/" alt="QR Code">
-    </div>    
-    <p>Nhập tên hoặc mã chấm công</p>
+    <!-- HEADER + NÚT BÁNH RĂNG -->
+    <div class="header-container">
+        <h2>🔎 BẢNG CHẤM CÔNG</h2>
+        <div style="font-size: 13px; opacity: 0.9;">Hệ thống Tra cứu Công & Tải dữ liệu</div>
+        
+        <!-- Nút Bánh răng -->
+        <button class="admin-gear-btn" onclick="openLoginModal()" title="Đăng nhập Quản trị">⚙</button>
+    </div>
 
-    <input type="text" id="search" placeholder="VD: HR028 hoặc HUYNH THI DIEM MY">
+    <!-- QR CODE & TÌM KIẾM -->
+    <div style="margin-top:10px">
+        <p style="margin:5px 0;">📱 Quét QR để tra cứu nhanh</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://elbalosnocni.github.io/bcc/" alt="QR Code">
+    </div>    
+    <p style="margin-top: 15px;">Nhập tên hoặc mã chấm công</p>
+
+    <input type="text" id="search" placeholder="VD: HR028 hoặc NGUYEN VAN VU">
 
     <div id="summary"></div>
 
-    <!-- Đã chuyển khung cuộn ra thẻ DIV bọc ngoài -->
+    <!-- BẢNG DỮ LIỆU -->
     <div class="table-container">
         <table id="result">
             <thead></thead>
@@ -103,12 +234,37 @@
         </table>
     </div>
 
+    <!-- MODAL POPUP ĐĂNG NHẬP ADMIN -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Đăng nhập quản trị</h3>
+                <button class="close-btn" onclick="closeLoginModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Tài khoản</label>
+                <input type="text" id="adminUser" placeholder="Username">
+            </div>
+
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="adminPass" placeholder="Password">
+            </div>
+
+            <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            
+            <div class="login-error" id="loginError">Sai tài khoản hoặc mật khẩu!</div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <script>
+        // --- 1. DỮ LIỆU BẢNG TÌM KIẾM ---
         let data = [];
         let headers = [];
-
         const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1Wr62GWAavPWXr4Q3SpSL4JhYIc7z8aiKgWzcJahft45bmxvPnBD7qFHCEMNWhXtBaTCIbDgbV6lh/pub?gid=0&single=true&output=csv";
 
         function removeVietnamese(str) {
@@ -122,19 +278,15 @@
         function createHeader() {
             if (!headers || headers.length === 0) return;
             let html = "<tr>";
-            headers.forEach(h => {
-                html += `<th>${h}</th>`;
-            });
+            headers.forEach(h => { html += `<th>${h}</th>`; });
             html += "</tr>";
             document.querySelector("#result thead").innerHTML = html;
         }
 
-        // Sự kiện Tìm kiếm
         document.getElementById("search").addEventListener("input", function () {
             const rawKeyword = this.value.trim();
             const keyword = removeVietnamese(rawKeyword.toLowerCase());
 
-            // Nếu bỏ trống ô tìm kiếm -> Hiện toàn bộ dữ liệu
             let filtered = data;
             if (keyword !== "") {
                 filtered = data.filter(r => {
@@ -148,8 +300,7 @@
             filtered.forEach(r => {
                 html += "<tr>";
                 headers.forEach(col => {
-                    const value = r[col] || "";
-                    html += `<td>${value}</td>`;
+                    html += `<td>${r[col] || ""}</td>`;
                 });
                 html += "</tr>";
             });
@@ -158,33 +309,48 @@
             document.getElementById("summary").innerHTML = `Tìm thấy <b>${filtered.length}</b> dòng`;
         });
 
-        // Hàm tải dữ liệu từ Google Sheets
         function loadData() {
             fetch(sheetURL)
                 .then(res => res.text())
                 .then(csv => {
-                    const parsed = Papa.parse(csv, {
-                        header: true,
-                        skipEmptyLines: true
-                    });
-
+                    const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
                     data = parsed.data;
                     headers = parsed.meta.fields;
-
                     createHeader();
-
-                    // Cập nhật lại giao diện theo từ khóa hiện tại
                     document.getElementById("search").dispatchEvent(new Event("input"));
                 })
-                .catch(err => {
-                    console.error("Lỗi tải dữ liệu:", err);
-                    document.getElementById("summary").innerHTML = `<span class="error">Không thể tải dữ liệu!</span>`;
-                });
+                .catch(err => console.error("Lỗi tải dữ liệu:", err));
         }
 
-        // Tải dữ liệu lần đầu & Tự động cập nhật mỗi 60 giây
         loadData();
         setInterval(loadData, 60000);
+
+        // --- 2. XỬ LÝ MODAL POPUP ĐĂNG NHẬP ---
+        function openLoginModal() {
+            document.getElementById("loginModal").classList.add("active");
+        }
+
+        function closeLoginModal() {
+            document.getElementById("loginModal").classList.remove("active");
+            document.getElementById("loginError").style.display = "none";
+        }
+
+        function handleLogin() {
+            const user = document.getElementById("adminUser").value.trim();
+            const pass = document.getElementById("adminPass").value.trim();
+            const errorDiv = document.getElementById("loginError");
+
+            // Cấu hình tài khoản & Mật khẩu Admin của bạn tại đây
+            if (user === "admin" && pass === "123456") {
+                // Lưu trạng thái đăng nhập vào bộ nhớ trình duyệt (nếu cần)
+                sessionStorage.setItem("isAdminLoggedIn", "true");
+                
+                // Chuyển hướng sang trang Quản trị admin.html
+                window.location.href = "admin.html";
+            } else {
+                errorDiv.style.display = "block";
+            }
+        }
     </script>
 
 </body>
