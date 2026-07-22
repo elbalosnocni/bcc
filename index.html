@@ -236,7 +236,25 @@ document.getElementById("search").addEventListener("input",function(){
 
 });
 
-setInterval(()=>location.reload(),60000);
+function loadData() {
+    fetch(sheetURL)
+    .then(res => res.text())
+    .then(csv => {
+        const parsed = Papa.parse(csv,{
+            header:true,
+            skipEmptyLines:true
+        });
+
+        data = parsed.data;
+        headers = parsed.meta.fields;
+
+        createHeader();
+    });
+}
+
+loadData();
+
+setInterval(loadData,60000);
 
 </script>
 
