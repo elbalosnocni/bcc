@@ -127,7 +127,9 @@ const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1Wr62GWAavPW
 function removeVietnamese(str){
     return (str || "")
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g,"");
+        .replace(/[\u0300-\u036f]/g,"")
+        .replace(/đ/g,"d")
+        .replace(/Đ/g,"D");
 }
 
 // Load dữ liệu
