@@ -3,245 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Quản Trị - Cập Nhật Bảng Chấm Công</title>
+    <title>Admin - Bảng Chấm Công</title>
+    <!-- Thư viện đọc/ghi file Excel SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 30px; display: flex; justify-content: center; }
-        .admin-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; }
-        h2 { color: #2e7d32; margin-top: 0; text-align: center; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: bold; margin-bottom: 6px; }
-        select, input[type="text"], input[type="password"], input[type="file"] {
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        button.btn-upload {
-            width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; 
-            border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
+
+        .admin-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            padding: 30px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
-        button.btn-upload:hover { background: #1b5e20; }
-        
-        /* Top Navigation Bar */
-        .top-bar { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .top-btn { background: none; border: none; color: #1565c0; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0; }
-        .top-btn:hover { text-decoration: underline; }
-        .top-btn.logout { color: #c62828; }
 
-        #status { margin-top: 15px; font-weight: bold; text-align: center; padding: 10px; border-radius: 4px; }
-        .success { background: #e8f5e9; color: #2e7d32; }
-        .error { background: #ffebee; color: #c62828; }
-        .loading { background: #e3f2fd; color: #1565c0; }
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
 
-        /* Modal Đổi Mật Khẩu */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10; }
-        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 300px; }
-        .modal-content h3 { margin-top: 0; }
+        .top-nav a {
+            text-decoration: none;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .top-nav a.logout-btn {
+            color: #c62828;
+        }
+
+        .admin-title {
+            text-align: center;
+            color: #2e7d32;
+            font-size: 22px;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="file"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: #1b5e20;
+        }
+
+        .status-msg {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        /* MODAL ĐỔI MẬT KHẨU */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; visibility: hidden; opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+
+        .modal-card {
+            background: white; width: 90%; max-width: 380px;
+            padding: 25px 20px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
     </style>
 </head>
 <body>
 
-<div class="admin-card">
-    <div class="top-bar">
-        <button class="top-btn" onclick="openChangePassModal()">🔑 Đổi Mật Khẩu</button>
-        <button class="top-btn logout" onclick="logout()">🚪 Đăng xuất / Quay lại</button>
-    </div>
+    <div class="admin-card">
+        <div class="top-nav">
+            <a href="#" onclick="openChangePassModal(event)">🔑 Đổi Mật Khẩu</a>
+            <a href="#" onclick="handleLogout(event)" class="logout-btn">🚪 Đăng xuất / Quay lại</a>
+        </div>
 
-    <h2>🔐 ADMIN BẢNG CHẤM CÔNG</h2>
+        <div class="admin-title">🔒 ADMIN BẢNG CHẤM CÔNG</div>
 
-    <div class="form-group">
-        <label>📅 Chọn Tháng / Bảng Công Tải Lên:</label>
-        <select id="monthInput">
-            <!-- Dropdown danh sách tháng sẽ tự động tạo bởi JS -->
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>📁 Chọn File Excel (.xlsx / .xls):</label>
-        <input type="file" id="excelFile" accept=".xlsx, .xls">
-    </div>
-
-    <button class="btn-upload" onclick="uploadData()">🚀 Đẩy Dữ Liệu Lên Sheet</button>
-
-    <div id="status"></div>
-</div>
-
-<!-- MODAL ĐỔI MẬT KHẨU VĨNH VIỄN (ĐÃ CHUẨN ĐỊNH DẠNG) -->
-<div class="modal" id="passModal">
-    <div class="modal-content">
-        <h3>🔑 Đổi mật khẩu Admin</h3>
+        <!-- BƯỚC 1: CHỌN THÁNG -->
         <div class="form-group">
-            <label>Mật khẩu cũ:</label>
-            <input type="password" id="oldPass" placeholder="Nhập mật khẩu cũ">
+            <label>📅 Chọn Tháng / Bảng Công Tải Lên:</label>
+            <select id="monthSelect">
+                <!-- Sẽ tự động tạo danh sách các tháng -->
+            </select>
         </div>
+
+        <!-- BƯỚC 2: CHỌN FILE EXCEL VÀ NÚT TẢI FILE MẪU -->
         <div class="form-group">
-            <label>Mật khẩu mới:</label>
-            <input type="password" id="newPass" placeholder="Nhập mật khẩu mới">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin-bottom: 0;">📁 Chọn File Excel (.xlsx / .xls):</label>
+                <!-- NÚT TẢI FILE MẪU -->
+                <a href="#" onclick="downloadSampleExcel(event)" style="font-size: 13px; color: #1565c0; font-weight: bold; text-decoration: none;">📥 Tải file mẫu</a>
+            </div>
+            <input type="file" id="excelFile" accept=".xlsx, .xls">
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-upload" onclick="saveNewPass()">Lưu Vĩnh Viễn</button>
-            <button class="btn-upload" style="background:#757575;" onclick="closeChangePassModal()">Hủy</button>
+
+        <!-- NÚT ĐẨY DỮ LIỆU -->
+        <button class="btn-submit" id="btnUpload" onclick="uploadData()">🚀 Đẩy Dữ Liệu Lên Sheet</button>
+
+        <!-- THÔNG BÁO TRẠNG THÁI -->
+        <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+    <!-- MODAL ĐỔI MẬT KHẨU -->
+    <div class="modal-overlay" id="changePassModal">
+        <div class="modal-card">
+            <h3 style="margin-top:0; text-align:center;">Đổi mật khẩu Admin</h3>
+            <div class="form-group">
+                <label>Mật khẩu hiện tại</label>
+                <input type="password" id="oldPass">
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu mới</label>
+                <input type="password" id="newPass">
+            </div>
+            <div class="form-group">
+                <label>Xác nhận mật khẩu mới</label>
+                <input type="password" id="confirmPass">
+            </div>
+            <button class="btn-submit" onclick="submitChangePassword()" style="background:#1877f2;">Cập nhật mật khẩu</button>
+            <button class="btn-submit" onclick="closeChangePassModal()" style="background:#757575; margin-top:8px;">Hủy</button>
+            <div id="passStatus" style="margin-top:10px; font-size:13px; text-align:center;"></div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWrC2s_E9WRa2zF0-9X7iowz6-gjOJ5CRkbATIP2QqKKPZnKVDUt_ggrrckDAJq6xCLA/exec";
 
-<script>
-    // URL Web App Apps Script
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWrC2s_E9WRa2zF0-9X7iowz6-gjOJ5CRkbATIP2QqKKPZnKVDUt_ggrrckDAJq6xCLA/exec";
-
-    // Tự động tạo danh sách 12 tháng của năm hiện tại
-    function generateMonthOptions() {
-        const select = document.getElementById("monthInput");
-        select.innerHTML = "";
-        
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear();
-        
-        for (let m = 1; m <= 12; m++) {
-            const monthStr = m < 10 ? `0${m}` : `${m}`;
-            const optVal = `Tháng ${monthStr}-${currentYear}`;
-            
-            const opt = document.createElement("option");
-            opt.value = optVal;
-            opt.innerText = optVal;
-            
-            if (m === (currentDate.getMonth() + 1)) {
-                opt.selected = true;
-            }
-            select.appendChild(opt);
-        }
-    }
-
-    // KÍCH HOẠT KIỂM TRA ĐĂNG NHẬP KHI MỞ TRANG
-    window.onload = function() {
+        // Kiểm tra quyền đăng nhập
         const adminPass = sessionStorage.getItem("adminPass");
         if (!adminPass) {
-            alert("Bạn chưa đăng nhập!");
+            alert("Vui lòng đăng nhập trước!");
             window.location.href = "index.html";
-        } else {
-            generateMonthOptions();
-        }
-    };
-
-    function logout() {
-        sessionStorage.removeItem("adminPass");
-        window.location.href = "index.html";
-    }
-
-    async function uploadData(confirmOverwrite = false) {
-        const pass = sessionStorage.getItem("adminPass"); 
-        const monthSelect = document.getElementById("monthInput");
-        const month = monthSelect ? monthSelect.value : "";
-        const fileInput = document.getElementById("excelFile");
-
-        if (!month || fileInput.files.length === 0) {
-            showStatus("Vui lòng chọn Tháng và chọn File Excel!", "error");
-            return;
         }
 
-        showStatus("⏳ Đang xử lý file...", "loading");
+        // Tự động tạo danh sách 12 tháng gần nhất cho ô chọn
+        function generateMonthOptions() {
+            const select = document.getElementById("monthSelect");
+            select.innerHTML = "";
+            const now = new Date();
 
-        const file = fileInput.files[0];
-        const reader = new FileReader();
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const monthVal = `Tháng ${month}-${year}`;
 
-        reader.onload = async function(e) {
+                const opt = document.createElement("option");
+                opt.value = monthVal;
+                opt.innerText = monthVal;
+                select.appendChild(opt);
+            }
+        }
+        generateMonthOptions();
+
+        // 🟢 HÀM TẠO VÀ TẢI FILE EXCEL MẪU TRỰC TIẾP
+        function downloadSampleExcel(e) {
+            e.preventDefault();
+            
+            // Cấu trúc bảng mẫu - Bạn có thể chỉnh sửa/thêm bớt tên các cột theo nhu cầu thực tế
+            const sampleData = [
+                ["STT", "Họ và Tên", "Mã", "Công", "Ngày lễ", "Nghỉ hưởng lương 100%", "Nghỉ không hưởng lương", "Nghỉ hưởng lương tối thiểu vùng",	"TĂNG CA (giờ)", "TĂNG CA ĐÊM (giờ)", "CA ĐÊM", "LÀM VÀO NGÀY NGHỈ (giờ)", "OT NGÀY NGHỈ (giờ)",	"LÀM NGÀY LỄ (giờ)", "OT NGÀY LỄ (giờ)", "TĂNG CA ĐÊM LỄ"],
+                ["1", "NGUYỄN THỊ A", "PL000", "24,"24",	"24", "24", "24", "24", "24", "24", "24", "24", "24", "24", "24"],
+                ["2", "TRẦN VĂN B", "PR000", "24,"24",	"24", "24", "24", "24", "24", "24", "24", "24", "24", "24", "24"]
+            ];
+
+            // Dùng thư viện XLSX tạo sheet & workbook
+            const ws = XLSX.utils.aoa_to_sheet(sampleData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "BangChamCong");
+
+            // Xuất file tải về máy người dùng
+            XLSX.writeFile(wb, "File_Mau_Bang_Cham_Cong.xlsx");
+        }
+
+        // Hàm đẩy dữ liệu từ Excel lên Google Sheets
+        async function uploadData(confirmOverwrite = false) {
+            const month = document.getElementById("monthSelect").value;
+            const fileInput = document.getElementById("excelFile");
+            const statusMsg = document.getElementById("statusMsg");
+            const btnUpload = document.getElementById("btnUpload");
+
+            if (!fileInput.files.length) {
+                showStatus("⚠️ Vui lòng chọn file Excel trước khi tải lên!", "#fff3cd", "#856404");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            showStatus("⏳ Đang xử lý file Excel...", "#e3f2fd", "#0d47a1");
+            btnUpload.disabled = true;
+
+            reader.onload = async function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Chuyển dữ liệu Excel thành mảng 2 chiều
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    if (rows.length === 0) {
+                        showStatus("❌ File Excel rỗng!", "#ffebee", "#c62828");
+                        btnUpload.disabled = false;
+                        return;
+                    }
+
+                    showStatus("⏳ Đang đẩy dữ liệu lên Google Sheets...", "#e3f2fd", "#0d47a1");
+
+                    // Gửi request POST sang Apps Script
+                    const response = await fetch(GAS_WEB_APP_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            password: adminPass,
+                            month: month,
+                            rows: rows,
+                            confirmOverwrite: confirmOverwrite
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showStatus("✅ " + result.message, "#e8f5e9", "#2e7d32");
+                        fileInput.value = "";
+                    } else if (result.isDuplicate) {
+                        if (confirm(result.message)) {
+                            uploadData(true); // Nếu bấm OK thì thực hiện ghi đè
+                        } else {
+                            showStatus("ℹ️ Đã hủy thao tác cập nhật.", "#fff3cd", "#856404");
+                        }
+                    } else {
+                        showStatus("❌ " + result.message, "#ffebee", "#c62828");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showStatus("❌ Lỗi khi đọc file hoặc kết nối máy chủ!", "#ffebee", "#c62828");
+                } finally {
+                    btnUpload.disabled = false;
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showStatus(text, bgColor, textColor) {
+            const statusMsg = document.getElementById("statusMsg");
+            statusMsg.style.display = "block";
+            statusMsg.style.backgroundColor = bgColor;
+            statusMsg.style.color = textColor;
+            statusMsg.innerHTML = text;
+        }
+
+        // Đăng xuất
+        function handleLogout(e) {
+            e.preventDefault();
+            sessionStorage.removeItem("adminPass");
+            window.location.href = "index.html";
+        }
+
+        // Mở/Đóng Modal đổi mật khẩu
+        function openChangePassModal(e) {
+            e.preventDefault();
+            document.getElementById("changePassModal").classList.add("active");
+        }
+
+        function closeChangePassModal() {
+            document.getElementById("changePassModal").classList.remove("active");
+            document.getElementById("oldPass").value = "";
+            document.getElementById("newPass").value = "";
+            document.getElementById("confirmPass").value = "";
+            document.getElementById("passStatus").innerText = "";
+        }
+
+        // Xử lý Đổi Mật Khẩu
+        async function submitChangePassword() {
+            const oldPass = document.getElementById("oldPass").value.trim();
+            const newPass = document.getElementById("newPass").value.trim();
+            const confirmPass = document.getElementById("confirmPass").value.trim();
+            const passStatus = document.getElementById("passStatus");
+
+            if (!oldPass || !newPass || !confirmPass) {
+                passStatus.style.color = "#d32f2f";
+                passStatus.innerText = "❌ Vui lòng điền đầy đủ thông tin!";
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                passStatus.style.color = "#d32f2f";
+                passStatus.innerText = "❌ Mật khẩu mới không trùng khớp!";
+                return;
+            }
+
+            passStatus.style.color = "#1565c0";
+            passStatus.innerText = "⏳ Đang cập nhật...";
+
             try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-
                 const response = await fetch(GAS_WEB_APP_URL, {
                     method: "POST",
                     body: JSON.stringify({
-                        password: pass,
-                        month: month,
-                        rows: rows,
-                        confirmOverwrite: confirmOverwrite
+                        action: "changePassword",
+                        oldPassword: oldPass,
+                        newPassword: newPass
                     })
                 });
 
                 const result = await response.json();
 
-                if (!result.success && result.isDuplicate) {
-                    if (confirm(result.message)) {
-                        uploadData(true);
-                    } else {
-                        showStatus("❌ Đã hủy thao tác cập nhật trùng tháng.", "error");
-                    }
-                    return;
-                }
-
                 if (result.success) {
-                    showStatus("✅ " + result.message, "success");
-                    fileInput.value = "";
+                    sessionStorage.setItem("adminPass", newPass);
+                    alert("✅ Đổi mật khẩu thành công!");
+                    closeChangePassModal();
                 } else {
-                    showStatus("❌ " + result.message, "error");
+                    passStatus.style.color = "#d32f2f";
+                    passStatus.innerText = "❌ " + result.message;
                 }
             } catch (err) {
-                console.error("Lỗi Upload:", err);
-                showStatus("❌ Đã có lỗi xảy ra khi đẩy dữ liệu!", "error");
+                passStatus.style.color = "#d32f2f";
+                passStatus.innerText = "❌ Lỗi kết nối máy chủ!";
             }
-        };
-
-        reader.readAsArrayBuffer(file);
-    }
-
-    function showStatus(msg, type) {
-        const statusDiv = document.getElementById("status");
-        statusDiv.innerText = msg;
-        statusDiv.className = type;
-    }
-
-    // Modal Đổi Mật Khẩu
-    function openChangePassModal() { 
-        document.getElementById("passModal").style.display = "flex"; 
-    }
-    
-    function closeChangePassModal() { 
-        document.getElementById("passModal").style.display = "none"; 
-        document.getElementById("oldPass").value = "";
-        document.getElementById("newPass").value = "";
-    }
-
-    // Hàm đổi mật khẩu vĩnh viễn trực tiếp lên Google Sheet
-    async function saveNewPass() {
-        const oldPass = document.getElementById("oldPass").value.trim();
-        const newPass = document.getElementById("newPass").value.trim();
-
-        if (!oldPass || !newPass) {
-            alert("Vui lòng nhập đầy đủ mật khẩu cũ và mật khẩu mới!");
-            return;
         }
-
-        showStatus("⏳ Đang đổi mật khẩu...", "loading");
-
-        try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "changePassword",
-                    oldPassword: oldPass,
-                    newPassword: newPass
-                })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                sessionStorage.setItem("adminPass", newPass); // Cập nhật lại mật khẩu cho phiên làm việc hiện tại
-                alert("✅ " + result.message);
-                closeChangePassModal();
-                showStatus("✅ Đã cập nhật mật khẩu mới!", "success");
-            } else {
-                alert("❌ " + result.message);
-                showStatus("❌ " + result.message, "error");
-            }
-        } catch (err) {
-            alert("❌ Lỗi kết nối máy chủ!");
-            showStatus("❌ Lỗi kết nối máy chủ!", "error");
-        }
-    }
-</script>
-
+    </script>
 </body>
 </html>
