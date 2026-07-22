@@ -336,21 +336,20 @@
         }
 
         function handleLogin() {
-            const user = document.getElementById("adminUser").value.trim();
-            const pass = document.getElementById("adminPass").value.trim();
-            const errorDiv = document.getElementById("loginError");
+    const user = document.getElementById("adminUser").value.trim();
+    const pass = document.getElementById("adminPass").value.trim();
+    const errorDiv = document.getElementById("loginError");
 
-            // Cấu hình tài khoản & Mật khẩu Admin của bạn tại đây
-            if (user === "admin" && pass === "123456") {
-                // Lưu trạng thái đăng nhập vào bộ nhớ trình duyệt (nếu cần)
-                sessionStorage.setItem("isAdminLoggedIn", "true");
-                
-                // Chuyển hướng sang trang Quản trị admin.html
-                window.location.href = "admin.html";
-            } else {
-                errorDiv.style.display = "block";
-            }
-        }
+    if (user === "admin" && pass === "123456") { // Thay 123456 bằng MK của bạn
+        // Lưu mật khẩu vào bộ nhớ phiên làm việc
+        sessionStorage.setItem("adminPass", pass);
+        
+        // Chuyển hướng sang trang admin
+        window.location.href = "admin.html";
+    } else {
+        errorDiv.style.display = "block";
+    }
+}
     </script>
 
 </body>
