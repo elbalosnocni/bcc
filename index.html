@@ -106,11 +106,11 @@
 
     <div class="header-container">
         <h2>BẢNG CHẤM CÔNG</h2>
-<!-- <div style="font-size: 13px; opacity: 0.9;">P. Nhân sự: 02743.743.118 - Nhánh 119</div> -->
-        <!-- số điện thoại Zalo của bạn -->
-<a href="https://zalo.me/0563925169" target="_blank" style="color: #0068ff; font-weight: bold; text-decoration: none;">
-    💬 Liên hệ Zalo Hỗ Trợ
-</a>
+        <div style="text-align: center; margin-top: 15px;">
+            <a id="zaloLink" href="#" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background-color: #0068ff; color: white; border-radius: 20px; text-decoration: none; font-size: 13px; font-weight: bold;">
+                <span>💬</span> Liên hệ Zalo Hỗ Trợ
+            </a>
+        </div>
         <button class="admin-gear-btn" onclick="openLoginModal()" title="Đăng nhập Quản trị">⚙</button>
     </div>
 
@@ -148,7 +148,7 @@
             
             <div class="form-group">
                 <label>Mật khẩu Admin</label>
-                <input type="password" id="adminPass" placeholder="Nhập mật khẩu">
+                <input type="password" id="adminPass" placeholder="Nhập mật khẩu" onkeydown="if(event.key==='Enter') handleLogin()">
             </div>
 
             <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
@@ -162,6 +162,20 @@
 
         let data = [];
         let headers = [];
+
+        // Tự động tải số Zalo hỗ trợ
+        async function loadZaloContact() {
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?action=getZalo`);
+                const result = await res.json();
+                if (result.zaloPhone) {
+                    document.getElementById("zaloLink").href = "https://zalo.me/" + result.zaloPhone;
+                }
+            } catch (e) {
+                console.error("Lỗi tải số Zalo:", e);
+            }
+        }
+        loadZaloContact();
 
         function removeVietnamese(str) {
             return (str || "")
@@ -275,6 +289,7 @@
 
         function openLoginModal() {
             document.getElementById("loginModal").classList.add("active");
+            document.getElementById("adminPass").focus();
         }
 
         function closeLoginModal() {
@@ -283,13 +298,14 @@
             document.getElementById("adminPass").value = "";
         }
 
-        // HÀM XÁC THỰC ĐĂNG NHẬP MỚI VỚI APPS SCRIPT
         async function handleLogin() {
             const passwordInput = document.getElementById("adminPass").value.trim();
             const errorMsg = document.getElementById("loginError");
 
             if (!passwordInput) {
-                alert("Vui lòng nhập mật khẩu!");
+                errorMsg.style.display = "block";
+                errorMsg.style.color = "#d32f2f";
+                errorMsg.innerText = "⚠️ Vui lòng nhập mật khẩu!";
                 return;
             }
 
