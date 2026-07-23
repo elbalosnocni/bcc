@@ -66,7 +66,7 @@
             margin-bottom: 8px;
         }
 
-        select, input[type="file"], input[type="password"] {
+        select, input[type="file"], input[type="password"], input[type="text"] {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
@@ -102,7 +102,7 @@
             display: none;
         }
 
-        /* MODAL ĐỔI MẬT KHẨU */
+        /* MODAL ĐỔI MẬT KHẨU / CẤU HÌNH */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.5);
@@ -125,8 +125,8 @@
 
     <div class="admin-card">
         <div class="top-nav">
-            <a href="#" onclick="openChangePassModal(event)">🔑 Đổi Mật Khẩu</a>
-            <a href="#" onclick="handleLogout(event)" class="logout-btn">🚪 Đăng xuất / Quay lại</a>
+            <a href="#" onclick="openChangePassModal(event)">⚙️ Cấu hình Admin</a>
+            <a href="#" onclick="handleLogout(event)" class="logout-btn">🚪 Đăng xuất</a>
         </div>
 
         <div class="admin-title">🔒 ADMIN BẢNG CHẤM CÔNG</div>
@@ -134,21 +134,13 @@
         <!-- BƯỚC 1: CHỌN THÁNG -->
         <div class="form-group">
             <label>📅 Chọn Tháng / Bảng Công Tải Lên:</label>
-            <select id="monthSelect">
-                <!-- Dự phòng danh sách tháng sẵn có -->
-                <option value="Tháng 07-2026">Tháng 07-2026</option>
-                <option value="Tháng 06-2026">Tháng 06-2026</option>
-                <option value="Tháng 05-2026">Tháng 05-2026</option>
-                <option value="Tháng 04-2026">Tháng 04-2026</option>
-                <option value="Tháng 03-2026">Tháng 03-2026</option>
-            </select>
+            <select id="monthSelect"></select>
         </div>
 
         <!-- BƯỚC 2: CHỌN FILE EXCEL VÀ NÚT TẢI FILE MẪU -->
         <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <label style="margin-bottom: 0;">📁 Chọn File Excel (.xlsx / .xls):</label>
-                <!-- NÚT TẢI FILE MẪU -->
                 <a href="#" onclick="downloadSampleExcel(event)" style="font-size: 13px; color: #1565c0; font-weight: bold; text-decoration: none;">📥 Tải file mẫu</a>
             </div>
             <input type="file" id="excelFile" accept=".xlsx, .xls">
@@ -161,23 +153,32 @@
         <div class="status-msg" id="statusMsg"></div>
     </div>
 
-    <!-- MODAL ĐỔI MẬT KHẨU -->
+    <!-- MODAL ĐỔI MẬT KHẨU & SỐ ZALO -->
     <div class="modal-overlay" id="changePassModal">
         <div class="modal-card">
-            <h3 style="margin-top:0; text-align:center;">Đổi mật khẩu Admin</h3>
+            <h3 style="margin-top:0; text-align:center; color: #1565c0;">⚙️ Cấu Hình Admin</h3>
+            
             <div class="form-group">
-                <label>Mật khẩu hiện tại</label>
-                <input type="password" id="oldPass">
+                <label>📱 Số điện thoại Zalo hỗ trợ</label>
+                <input type="text" id="zaloPhone" placeholder="Ví dụ: 0912345678">
+            </div>
+
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+
+            <div class="form-group">
+                <label>🔑 Mật khẩu hiện tại (*)</label>
+                <input type="password" id="oldPass" placeholder="Nhập MK hiện tại để lưu">
             </div>
             <div class="form-group">
-                <label>Mật khẩu mới</label>
+                <label>🔑 Mật khẩu mới (Bỏ trống nếu không đổi)</label>
                 <input type="password" id="newPass">
             </div>
             <div class="form-group">
-                <label>Xác nhận mật khẩu mới</label>
+                <label>🔑 Xác nhận mật khẩu mới</label>
                 <input type="password" id="confirmPass">
             </div>
-            <button class="btn-submit" onclick="submitChangePassword()" style="background:#1877f2;">Cập nhật mật khẩu</button>
+
+            <button class="btn-submit" onclick="submitUpdateSettings()" style="background:#1877f2;">💾 Lưu Cập Nhật</button>
             <button class="btn-submit" onclick="closeChangePassModal()" style="background:#757575; margin-top:8px;">Hủy</button>
             <div id="passStatus" style="margin-top:10px; font-size:13px; text-align:center;"></div>
         </div>
@@ -193,7 +194,7 @@
             window.location.href = "index.html";
         }
 
-        // Tự động cập nhật danh sách 12 tháng động tính từ thời điểm hiện tại
+        // Tự động cập nhật danh sách 12 tháng động
         document.addEventListener("DOMContentLoaded", function () {
             try {
                 const select = document.getElementById("monthSelect");
@@ -217,7 +218,7 @@
             }
         });
 
-        // 🟢 HÀM TẠO VÀ TẢI FILE EXCEL MẪU TRỰC TIẾP (Đã sửa lỗi cú pháp)
+        // TẠO VÀ TẢI FILE EXCEL MẪU
         function downloadSampleExcel(e) {
             e.preventDefault();
             
@@ -227,20 +228,17 @@
                 ["2", "TRẦN VĂN B", "PR000", "26", "0", "0", "0", "0", "8", "2", "0", "0", "0", "0", "0", "0"]
             ];
 
-            // Dùng thư viện XLSX tạo sheet & workbook
             const ws = XLSX.utils.aoa_to_sheet(sampleData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "BangChamCong");
 
-            // Xuất file tải về máy
             XLSX.writeFile(wb, "File_Mau_Bang_Cham_Cong.xlsx");
         }
 
-        // Hàm đẩy dữ liệu từ Excel lên Google Sheets
+        // ĐẨY DỮ LIỆU EXCEL LÊN GOOGLE SHEETS
         async function uploadData(confirmOverwrite = false) {
             const month = document.getElementById("monthSelect").value;
             const fileInput = document.getElementById("excelFile");
-            const statusMsg = document.getElementById("statusMsg");
             const btnUpload = document.getElementById("btnUpload");
 
             if (!fileInput.files.length) {
@@ -261,7 +259,6 @@
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
                     
-                    // Chuyển dữ liệu Excel thành mảng 2 chiều
                     const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                     if (rows.length === 0) {
@@ -272,9 +269,9 @@
 
                     showStatus("⏳ Đang đẩy dữ liệu lên Google Sheets...", "#e3f2fd", "#0d47a1");
 
-                    // Gửi request POST sang Apps Script
                     const response = await fetch(GAS_WEB_APP_URL, {
                         method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
                         body: JSON.stringify({
                             password: adminPass,
                             month: month,
@@ -316,14 +313,14 @@
             statusMsg.innerHTML = text;
         }
 
-        // Đăng xuất
+        // ĐĂNG XUẤT
         function handleLogout(e) {
             e.preventDefault();
             sessionStorage.removeItem("adminPass");
             window.location.href = "index.html";
         }
 
-        // Mở/Đóng Modal đổi mật khẩu
+        // QUẢN LÝ MODAL CẤU HÌNH
         function openChangePassModal(e) {
             e.preventDefault();
             document.getElementById("changePassModal").classList.add("active");
@@ -337,20 +334,21 @@
             document.getElementById("passStatus").innerText = "";
         }
 
-        // Xử lý Đổi Mật Khẩu
-        async function submitChangePassword() {
+        // CẬP NHẬT CẤU HÌNH (MẬT KHẨU & ZALO)
+        async function submitUpdateSettings() {
+            const zaloPhone = document.getElementById("zaloPhone").value.trim();
             const oldPass = document.getElementById("oldPass").value.trim();
             const newPass = document.getElementById("newPass").value.trim();
             const confirmPass = document.getElementById("confirmPass").value.trim();
             const passStatus = document.getElementById("passStatus");
 
-            if (!oldPass || !newPass || !confirmPass) {
+            if (!oldPass) {
                 passStatus.style.color = "#d32f2f";
-                passStatus.innerText = "❌ Vui lòng điền đầy đủ thông tin!";
+                passStatus.innerText = "❌ Vui lòng nhập Mật khẩu hiện tại để xác thực!";
                 return;
             }
 
-            if (newPass !== confirmPass) {
+            if (newPass && newPass !== confirmPass) {
                 passStatus.style.color = "#d32f2f";
                 passStatus.innerText = "❌ Mật khẩu mới không trùng khớp!";
                 return;
@@ -362,18 +360,20 @@
             try {
                 const response = await fetch(GAS_WEB_APP_URL, {
                     method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({
-                        action: "changePassword",
+                        action: "updateSettings",
                         oldPassword: oldPass,
-                        newPassword: newPass
+                        newPassword: newPass || oldPass,
+                        zaloPhone: zaloPhone
                     })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    sessionStorage.setItem("adminPass", newPass);
-                    alert("✅ Đổi mật khẩu thành công!");
+                    if (newPass) sessionStorage.setItem("adminPass", newPass);
+                    alert("✅ Cập nhật cấu hình thành công!");
                     closeChangePassModal();
                 } else {
                     passStatus.style.color = "#d32f2f";
