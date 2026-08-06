@@ -14,6 +14,41 @@
             padding: 20px;
         }
 
+        /* THANH NAV TABS MỚI */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            max-width: 800px;
+            margin: 0 auto 15px auto;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 18px;
+            background: #ffffff;
+            color: #1b4985;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .nav-tab:hover {
+            background: #eef4fc;
+            border-color: #1b4985;
+            transform: translateY(-1px);
+        }
+
+        .nav-tab.active {
+            background: #1b4985;
+            color: #ffffff;
+            border-color: #1b4985;
+        }
+
         .header-container {
             position: relative;
             background: #1b4985;
@@ -67,26 +102,23 @@
         td { white-space: nowrap; }
         thead { position: sticky; top: 0; z-index: 10; }
         
-        /* CẤU HÌNH HEADER THU GỌN VÀ WRAP CHỮ */
         th { 
             background: #2e7d32; 
             color: #fff; 
             white-space: normal;
-            word-break: keep-all;         /* Giữ nguyên từ, chỉ ngắt dòng giữa các từ */
-            min-width: 70px;              /* Đảm bảo ô không bị ép quá hẹp trên điện thoại */
-            font-size: 13px;              /* Hạ nhẹ cỡ chữ header để cân đối */
-            line-height: 1.2;             /* Khoảng cách giữa các dòng chữ gãy ngọn */
+            word-break: keep-all;
+            min-width: 70px;
+            font-size: 13px;
+            line-height: 1.2;
             vertical-align: middle; 
         }
 
-        /* Định dạng riêng cho 3 cột đầu tiên để đẹp hơn */
-        th:nth-child(1) { min-width: 40px; }  /* Cột STT */
-        th:nth-child(2) { min-width: 140px; } /* Cột Họ và Tên */
-        th:nth-child(3) { min-width: 80px; }  /* Cột Mã */
+        th:nth-child(1) { min-width: 40px; }
+        th:nth-child(2) { min-width: 140px; }
+        th:nth-child(3) { min-width: 80px; }
         
         tbody tr:nth-child(even) { background: #fafafa; }
 
-        /* MODAL POPUP */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.5);
@@ -121,6 +153,14 @@
 </head>
 
 <body>
+
+    <!-- THANH TAB TRUY CẬP CÁC TRANG -->
+    <div class="nav-tabs">
+        <a href="#" class="nav-tab active">📋 Chấm Công</a>
+        <a href="https://noiquy.pages.dev" target="_blank" class="nav-tab">📜 Nội Quy</a>
+        <a href="https://bhxh.pages.dev" target="_blank" class="nav-tab">🏥 BHXH</a>
+        <a href="https://antoan.pages.dev" target="_blank" class="nav-tab">🛡️ An Toàn</a>
+    </div>
 
     <div class="header-container">
         <h2>BẢNG CHẤM CÔNG</h2>
@@ -181,7 +221,6 @@
         let data = [];
         let headers = [];
 
-        // Tự động tải số Zalo hỗ trợ
         async function loadZaloContact() {
             try {
                 const res = await fetch(`${GAS_WEB_APP_URL}?action=getZalo`);
@@ -217,18 +256,10 @@
                 html += "<tr>";
                 headers.forEach((col, index) => {
                     let val = r[col];
-                    
-                    // Nếu từ cột thứ 4 trở đi (index >= 3) và giá trị là số
                     if (index >= 3 && val !== "" && val !== null && val !== undefined && !isNaN(val)) {
                         let num = Number(val);
-                        // Làm tròn đến 2 chữ số thập phân và bỏ các số 0 thừa ở cuối (ví dụ: 25.50 -> 25.5)
                         val = parseFloat(num.toFixed(2)); 
-                        
-                        // Nếu bạn muốn LUÔN hiển thị đúng 2 số thập phân (kể cả số nguyên, ví dụ 26 -> 26.00)
-                        // Thì dùng dòng bên dưới thay cho dòng trên:
-                        // val = num.toFixed(2);
                     }
-                    
                     html += `<td>${val !== undefined ? val : ""}</td>`;
                 });
                 html += "</tr>";
