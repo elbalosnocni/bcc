@@ -197,12 +197,25 @@
             let html = "";
             listData.forEach(r => {
                 html += "<tr>";
-                headers.forEach(col => {
-                    html += `<td>${r[col] || ""}</td>`;
+                headers.forEach((col, index) => {
+                    let val = r[col];
+                    
+                    // Nếu từ cột thứ 4 trở đi (index >= 3) và giá trị là số
+                    if (index >= 3 && val !== "" && val !== null && val !== undefined && !isNaN(val)) {
+                        let num = Number(val);
+                        // Làm tròn đến 2 chữ số thập phân và bỏ các số 0 thừa ở cuối (ví dụ: 25.50 -> 25.5)
+                        val = parseFloat(num.toFixed(2)); 
+                        
+                        // Nếu bạn muốn LUÔN hiển thị đúng 2 số thập phân (kể cả số nguyên, ví dụ 26 -> 26.00)
+                        // Thì dùng dòng bên dưới thay cho dòng trên:
+                        // val = num.toFixed(2);
+                    }
+                    
+                    html += `<td>${val !== undefined ? val : ""}</td>`;
                 });
                 html += "</tr>";
             });
-
+        
             document.querySelector("#result tbody").innerHTML = html;
             document.getElementById("summary").innerHTML = `Hiển thị <b>${listData.length}</b> dòng`;
         }
