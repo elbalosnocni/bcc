@@ -71,11 +71,19 @@
         th { 
             background: #2e7d32; 
             color: #fff; 
-            white-space: normal; 
-            word-break: break-word; 
-            max-width: 90px; 
+            white-space: normal;
+            word-break: keep-all;         /* Giữ nguyên từ, chỉ ngắt dòng giữa các từ */
+            min-width: 70px;              /* Đảm bảo ô không bị ép quá hẹp trên điện thoại */
+            font-size: 13px;              /* Hạ nhẹ cỡ chữ header để cân đối */
+            line-height: 1.2;             /* Khoảng cách giữa các dòng chữ gãy ngọn */
             vertical-align: middle; 
         }
+
+        /* Định dạng riêng cho 3 cột đầu tiên để đẹp hơn */
+        th:nth-child(1) { min-width: 40px; }  /* Cột STT */
+        th:nth-child(2) { min-width: 140px; } /* Cột Họ và Tên */
+        th:nth-child(3) { min-width: 80px; }  /* Cột Mã */
+        
         tbody tr:nth-child(even) { background: #fafafa; }
 
         /* MODAL POPUP */
