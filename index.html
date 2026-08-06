@@ -63,9 +63,19 @@
         }
 
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 8px; white-space: nowrap; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        td { white-space: nowrap; }
         thead { position: sticky; top: 0; z-index: 10; }
-        th { background: #2e7d32; color: #fff; }
+        
+        /* CẤU HÌNH HEADER THU GỌN VÀ WRAP CHỮ */
+        th { 
+            background: #2e7d32; 
+            color: #fff; 
+            white-space: normal; 
+            word-break: break-word; 
+            max-width: 90px; 
+            vertical-align: middle; 
+        }
         tbody tr:nth-child(even) { background: #fafafa; }
 
         /* MODAL POPUP */
